@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ZIP → PDF 変換ツール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- フォント（なくても動く） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="bg-gradient"></div>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-mark">Z</span>
+        <span class="logo-text">ZIP to PDF Studio</span>
+      </div>
+      <div class="status-indicator" id="status-indicator">
+        <span class="dot"></span>
+        <span class="label">Ready</span>
+      </div>
+    </header>
+
+    <main class="card">
+      <div class="card-header">
+        <h1>スキャン画像 ZIP → 1つの PDF</h1>
+        <p class="subtitle">
+          参考書1冊分のスキャン画像が入った ZIP をアップロードすると、<br>
+          <span class="accent">保存日時が古い順</span>に並べた PDF を自動生成します。
+        </p>
+      </div>
+
+      {% if error %}
+        <div class="alert alert-error">
+          <span class="alert-title">変換エラー</span>
+          <span class="alert-message">{{ error }}</span>
+        </div>
+      {% endif %}
+
+      <form id="convert-form" method="post" enctype="multipart/form-data">
+        <label class="drop-area" id="drop-area">
+          <div class="drop-inner">
+            <div class="drop-icon">
+              <span class="icon-cloud">☁</span>
+              <span class="icon-arrow">⬇</span>
+            </div>
+            <div class="drop-text-group">
+              <p class="drop-title">ここに ZIP をドラッグ＆ドロップ</p>
+              <p class="drop-subtitle">またはクリックして ZIP ファイルを選択</p>
+              <p class="drop-hint">※ 画像ファイル（PNG / JPG など）が入った ZIP に対応</p>
+            </div>
+            <div class="file-info" id="file-info">
+              ファイルが選択されていません
+            </div>
+          </div>
+          <input type="file" name="zip_file" id="zip-input" accept=".zip" required>
+        </label>
+
+        <div class="controls">
+          <button type="submit" id="submit-btn" class="primary-btn" disabled>
+            <span class="btn-label">PDF に変換する</span>
+            <span class="btn-spinner" id="btn-spinner"></span>
+          </button>
+
+          <div class="meta">
+            <div class="meta-item">
+              <span class="meta-label">ページ順</span>
+              <span class="meta-value">ファイルの保存日時が古い順</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">処理</span>
+              <span class="meta-value">ブラウザ ⇄ ローカルPC のみ（クラウド送信なし）</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress" id="progress">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      </form>
+
+      <section class="tips">
+        <h2>使い方のコツ</h2>
+        <ul>
+          <li>スキャンした画像は <span>001.png, 002.png…</span> のように連番にしておくと管理しやすいです。</li>
+          <li>1冊分が重くなりすぎる場合は、章ごとに ZIP を分けて PDF を作るのもおすすめです。</li>
+          <li>変換結果の PDF は、あとからしおり・注釈アプリと組み合わせると勉強がラクになります。</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>ZIP → PDF Studio</span>
+      <span class="dot-separator">•</span>
+      <span>local only / for personal study use</span>
+    </footer>
+  </div>
+
+  <script>
+    const dropArea   = document.getElementById('drop-area');
+    const fileInput  = document.getElementById('zip-input');
+    const fileInfo   = document.getElementById('file-info');
+    const submitBtn  = document.getElementById('submit-btn');
+    const statusInd  = document.getElementById('status-indicator');
+    const progress   = document.getElementById('progress');
+    const progressBar= document.getElementById('progress-bar');
+    const form       = document.getElementById('convert-form');
+    const btnSpinner = document.getElementById('btn-spinner');
+
+    function setStatus(label, mode) {
+      statusInd.querySelector('.label').textContent = label;
+      statusInd.dataset.mode = mode; // CSSで色を変える用
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return '';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      let i = 0;
+      let num = bytes;
+      while (num >= 1024 && i < units.length - 1) {
+        num /= 1024;
+        i++;
+      }
+      return num.toFixed(1) + ' ' + units[i];
+    }
+
+    function handleFiles(files) {
+      if (!files || files.length === 0) return;
+      const file = files[0];
+      if (!file.name.toLowerCase().endsWith('.zip')) {
+        fileInfo.textContent = 'ZIPファイルを選択してください';
+        submitBtn.disabled = true;
+        setStatus('Invalid file', 'error');
+        return;
+      }
+      fileInput.files = files;
+      fileInfo.textContent = `${file.name}  (${formatBytes(file.size)})`;
+      submitBtn.disabled = false;
+      setStatus('Ready to convert', 'ready');
+    }
+
+    // クリックでファイル選択
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    // ファイル入力が変わったとき
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    // ドラッグ関連
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.add('is-dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.remove('is-dragover');
+      });
+    });
+
+    dropArea.addEventListener('drop', e => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
+      }
+    });
+
+    // 画面全体でのデフォルトのドラッグ挙動を抑止
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, e => {
+        e.preventDefault();
+      });
+    });
+
+    // フォーム送信時のちょっとした演出
+    form.addEventListener('submit', (e) => {
+      if (submitBtn.disabled) {
+        e.preventDefault();
+        return;
+      }
+      // ローディング状態にする
+      submitBtn.disabled = true;
+      submitBtn.classList.add('is-loading');
+      setStatus('Converting...', 'busy');
+      progress.classList.add('is-visible');
+      btnSpinner.classList.add('is-visible');
+
+      // 疑似的なプログレスアニメーション
+      progressBar.style.width = '0%';
+      let progressValue = 0;
+      const timer = setInterval(() => {
+        // ページ遷移前にじわっと伸びる感じだけ出す
+        progressValue = Math.min(progressValue + 7, 90);
+        progressBar.style.width = progressValue + '%';
+      }, 200);
+
+      // ページ遷移したらどうせリセットされるので、
+      // ここでは clearInterval は特にいらない（気持ち悪ければ以下をON）
+      window.addEventListener('beforeunload', () => clearInterval(timer));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+:root {
+  --bg-main: #050816;
+  --bg-card: rgba(15, 23, 42, 0.92);
+  --bg-card-soft: rgba(15, 23, 42, 0.8);
+  --border-subtle: rgba(148, 163, 184, 0.35);
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.3);
+  --accent-strong: #0ea5e9;
+  --error: #f97373;
+  --text-main: #e5e7eb;
+  --text-sub: #9ca3af;
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.65);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text-main);
+  background: radial-gradient(circle at top left, #1d2433 0, #050816 45%, #020617 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 背景の光り方 */
+.bg-gradient {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(56,189,248,0.18), transparent 55%),
+    radial-gradient(circle at 90% 10%, rgba(94,234,212,0.12), transparent 55%),
+    radial-gradient(circle at 50% 100%, rgba(56,189,248,0.15), transparent 55%);
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.app-shell {
+  max-width: 900px;
+  margin: 32px auto 40px;
+  padding: 0 16px 32px;
+}
+
+/* ヘッダー */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 8px 4px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, #e0f2fe, #0ea5e9 40%, #0369a1 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #0b1120;
+  box-shadow: 0 0 0 1px rgba(15,23,42,0.4), 0 10px 25px rgba(8,47,73,0.7);
+}
+
+.logo-text {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-size: 15px;
+  color: #e5e7eb;
+}
+
+/* ステータス表示 */
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.85);
+  border: 1px solid rgba(148,163,184,0.4);
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.status-indicator .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,0.7);
+}
+
+.status-indicator[data-mode="busy"] .dot {
+  background: #facc15;
+  box-shadow: 0 0 8px rgba(250,204,21,0.8);
+}
+
+.status-indicator[data-mode="error"] .dot {
+  background: #f97373;
+  box-shadow: 0 0 8px rgba(248,113,113,0.8);
+}
+
+/* メインカード */
+
+.card {
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-soft) 100%);
+  border-radius: 20px;
+  padding: 24px 26px 28px;
+  border: 1px solid rgba(148,163,184,0.4);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.card-header h1 {
+  margin: 0 0 6px;
+  font-size: 23px;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+
+.accent {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+/* アラート */
+
+.alert {
+  margin: 10px 0 18px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alert-error {
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  color: #fecaca;
+}
+
+.alert-title {
+  font-weight: 600;
+}
+
+.alert-message {
+  color: #fecaca;
+}
+
+/* ドロップエリア */
+
+.drop-area {
+  position: relative;
+  display: block;
+  margin-top: 8px;
+  border-radius: 18px;
+  border: 1.5px dashed rgba(148,163,184,0.7);
+  padding: 22px 18px;
+  background: radial-gradient(circle at top left, rgba(15,23,42,0.8), rgba(15,23,42,0.9));
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.1s ease, background 0.2s ease;
+}
+
+.drop-area:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(56,189,248,0.4), 0 14px 28px rgba(8,47,73,0.7);
+  transform: translateY(-1px);
+}
+
+.drop-area.is-dragover {
+  border-color: var(--accent-strong);
+  background: radial-gradient(circle at top, rgba(8,47,73,0.9), rgba(15,23,42,1));
+  box-shadow: 0 0 0 1px rgba(56,189,248,0.7), 0 14px 32px rgba(8,47,73,0.95);
+}
+
+.drop-inner {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drop-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: radial-gradient(circle at 30% 20%, #e0f2fe, #38bdf8 45%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 16px 32px rgba(8,47,73,0.9);
+  flex-shrink: 0;
+}
+
+.icon-cloud {
+  font-size: 30px;
+  transform: translateY(3px);
+}
+
+.icon-arrow {
+  position: absolute;
+  font-size: 16px;
+  bottom: 10px;
+  opacity: 0.95;
+}
+
+.drop-text-group {
+  flex: 1;
+}
+
+.drop-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.drop-subtitle {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.drop-hint {
+  margin: 0;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.file-info {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-left: 10px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(148,163,184,0.4);
+}
+
+.drop-area input[type="file"] {
+  display: none;
+}
+
+/* ボタン・メタ情報 */
+
+.controls {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.primary-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: linear-gradient(135deg, var(--accent-strong), #4f46e5);
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  box-shadow: 0 12px 30px rgba(15,23,42,0.9);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.12s ease, filter 0.12s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(15,23,42,0.95);
+  filter: brightness(1.04);
+}
+
+.primary-btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(248,250,252,0.35);
+  border-top-color: white;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+.btn-spinner.is-visible {
+  display: inline-block;
+}
+
+.primary-btn.is-loading .btn-label {
+  opacity: 0.85;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.meta-item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.meta-label {
+  color: #9ca3af;
+}
+
+.meta-value {
+  color: #e5e7eb;
+}
+
+/* プログレスバー */
+
+.progress {
+  margin-top: 14px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.9);
+  overflow: hidden;
+  opacity: 0;
+  transform: scaleX(0.8);
+  transform-origin: left;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.progress.is-visible {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #4f46e5);
+  border-radius: inherit;
+}
+
+/* Tips セクション */
+
+.tips {
+  margin-top: 22px;
+  border-top: 1px solid rgba(148,163,184,0.35);
+  padding-top: 14px;
+}
+
+.tips h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.tips ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.tips li {
+  margin-bottom: 4px;
+}
+
+.tips span {
+  color: var(--accent-strong);
+}
+
+/* フッター */
+
+.app-footer {
+  margin-top: 18px;
+  font-size: 11px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.dot-separator {
+  margin: 0 6px;
+}
+
+/* アニメーション */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* レスポンシブ */
+
+@media (max-width: 640px) {
+  .card {
+    padding: 18px 16px 22px;
+  }
+
+  .drop-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .drop-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .meta {
+    flex-direction: column;
+  }
+
+  .app-shell {
+    margin-top: 20px;
+  }
+}
